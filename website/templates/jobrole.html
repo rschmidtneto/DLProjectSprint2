@@ -1,0 +1,97 @@
+<div class="dropdown-center">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+    Select a role:
+  </button>
+  {% include 'jobrole_replace.html' %}
+</div>
+
+<div id="selected-role">
+<ul class="list-group list-group-flush">
+    <li class="list-group-item">
+    <strong>Role: </strong>
+    <input id="role-employee" type="text" placeholder="Role" readonly></li>
+    <li class="list-group-item">
+    <strong>Rate: </strong>
+    <input id="rate-employee" type="text" placeholder="Rate" readonly></li>
+    <li class="list-group-item">
+    <strong>Rate 1.5x: </strong>
+    <input id="rate15-employee" type="text" placeholder="Rate 1.5x"readonly></li>
+    <li class="list-group-item">
+    <strong>Rate 2x: </strong>
+    <input id="rate2-employee" type="text" placeholder="Rate 2x" readonly></li>
+    <li class="list-group-item">
+    <strong>Pay: </strong>
+    <input id="pay-employee" type="text" placeholder="Pay"readonly></li>
+    <li class="list-group-item">
+    <strong>Pay 1.5x: </strong>
+    <input id="pay15-employee" type="text" placeholder="Pay 1.5x" readonly></li>
+    <li class="list-group-item">
+    <strong>Pay 2: </strong>
+    <input id="pay2-employee" type="text" placeholder="Pay 2x"readonly></li>
+    <li class="list-group-item">
+    <strong>Travel: </strong>
+    <input id="travel-employee" type="text" placeholder="Travel" readonly></li>
+</div>
+
+
+<script>
+$(document).ready(function() {
+    const job_id = $("#job_id"); // Job ID
+    const date = $('#booking_date'); // Date for booking
+    const roles_div = $('.dropdown-menu'); // UL to be replaced
+    const url = '/getJobRoles/'; // Endpoint URL
+    const delay_by_in_ms = 700; // Delay before the search
+    let scheduled_function = false; // Scheduled function for delayed execution
+    
+    
+
+    function searchJobRole() {
+        $.ajax({
+            url: url + job_id.val(),
+            type: 'GET',
+            data: {
+            },
+            success: function(response) {
+                roles_div.html(response); 
+                $('.jobRole-result').click(function() {
+                
+                
+                
+    });
+            },
+            error: function() {
+                alert('Please try again.');
+                
+            }
+        });
+    }
+
+
+    roles_div.on('click', '.jobRole-result', function(event) {
+        event.preventDefault();
+        var role = $(this).data('bs-role-value');
+        var pay = $(this).data('bs-pay-value');
+        var pay15 = $(this).data('bs-pay15-value');
+        var pay2 = $(this).data('bs-pay2-value');
+        var rate = $(this).data('bs-rate-value');
+        var rate15 = $(this).data('bs-rate15-value');
+        var rate2 = $(this).data('bs-rate2-value');
+        var travel = $(this).data('bs-travel-value');
+        
+        $('#role-employee').val(role).change();
+        $('#rate-employee').val(rate).change();
+        $('#rate15-employee').val(rate15).change();
+        $('#rate2-employee').val(rate2).change();
+        $('#pay-employee').val(pay).change();
+        $('#pay15-employee').val(pay15).change();
+        $('#pay2-employee').val(pay2).change();
+        $('#travel-employee').val(travel).change(); 
+        
+        
+    
+});
+
+
+   
+});
+</script>

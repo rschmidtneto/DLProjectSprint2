@@ -1,0 +1,34 @@
+
+<table class="table table-hover table-bordered">
+    <thead>
+      <tr>
+        <th scope="col">PO Name</th>
+        <th scope="col">Monday</th>
+        <th scope="col">Tuesday</th>
+        <th scope="col">Wednesday</th>
+        <th scope="col">Thursday</th>
+        <th scope="col">Friday</th>
+        <th scope="col">Saturday</th>
+        <th scope="col">Sunday</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for job, assignments in job_assignments.items %}
+    <tr>
+    <td>{{ job.po_name }}</td>
+    {% for date in week_dates %}
+    <td  data-href="#" data-bs-jobid="{{job.job_id}}" data-bs-date="{{date|date:'Y-m-d'}}" data-bs-toggle="modal" data-bs-target="#viewBooking">
+        {% for assignment in assignments %}
+            {% if assignment.date == date %}
+               <a href="#" data-bs-toggle="modal" data-bs-target="#viewBooking"  data-bs-url="{% url 'booking' assignment.job_assignment_id %}">
+                 {{ assignment.employee.name }}
+              </a>
+            {% endif %}
+        {% endfor %}
+    </td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+
+</table>
+

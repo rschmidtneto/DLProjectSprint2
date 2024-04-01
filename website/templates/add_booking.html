@@ -1,0 +1,32 @@
+<div class="col-md-6 offset-md-3">
+<h2>Add booking</h2>
+<br/>
+<form method="POST" action = "{% url 'createBooking' %}">
+{{ form.as_p }}
+<br/>
+<button type = "submit" class="btn btn-secondary"> Save booking </button>
+</form>
+
+
+
+
+
+{% comment %} 
+<form id="addBookingForm">
+
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title" id="jobTitleName"></h5>
+    </div>
+    <ul class="list-group list-group-flush">
+      {% include 'get_employee.html' %}
+      {% include 'jobrole.html' %}
+    <li class="list-group-item" id="bookingDate">
+    <strong>Date: </strong>
+      </li>
+    </ul>
+    <div class="card-body">
+      <button type="button" id="submitBooking" class="btn btn-secondary">Save</button>
+    </div>
+  </div>
+</form> {% endcomment %}

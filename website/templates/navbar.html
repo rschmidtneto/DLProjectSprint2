@@ -1,0 +1,45 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <span class="navbar-brand">DL Admin</span>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'roaster' %}">Bookings</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Manage Jobs</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Manage Employees</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Add Hours</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Create Invoices</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Manage Invoices</a>
+          </li>
+          <div class="form-inline my-2 my-lg-0">
+            <ul class="nav-item">
+              <li class="nav-item">
+              <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+              </li>
+            </ul>
+          </div> 
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Login</a>
+          </li>
+          {% endif %}
+          
+        </ul>
+      </div>
+    </div>
+  </nav>

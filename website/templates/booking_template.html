@@ -1,0 +1,37 @@
+<form method="post">
+
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">{{ schedule.job }}</h5>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <strong>Name: </strong>
+        <input type="text" name="employee_name" value="{{ schedule.employee.name }}" class="form-control" />
+      </li>
+      <li class="list-group-item">
+        <strong>Phone: </strong>{{ schedule.employee.phone }} 
+      </li>
+      <li class="list-group-item">
+        <strong>Role: </strong>
+         <input type="text" name="job_role_description" value="{{ schedule.job_role.role_description }}" class="form-control" />
+      </li>
+      <li class="list-group-item">
+        <strong>Rate: </strong>${{ schedule.job_role.rate }}/${{ schedule.job_role.rate_1_5x }}/${{ schedule.job_role.rate_2x }}
+      </li>
+      <li class="list-group-item">
+        <strong>Travel: </strong>${{ schedule.job_role.travel }}
+      </li>
+      <li class="list-group-item">
+        <strong>Pay: </strong>${{ schedule.job_role.pay }}/${{ schedule.job_role.pay_1_5x }}/${{ schedule.job_role.pay_2x }}
+      </li>
+      <li class="list-group-item">
+        <strong>Date: </strong>{{ schedule.date | date:"d/m/Y" }}
+      </li>
+    </ul>
+    <div class="card-body">
+      <button type="submit" class="btn btn-secondary" data-bs-url="{% url 'editBooking' schedule.job_assignment_id %}">Save Changes</button>
+      <button type="button" class="btn btn-danger deleteBooking" data-bs-url="{% url 'deleteBooking' schedule.job_assignment_id %}">Delete</button>
+    </div>
+  </div>
+</form>

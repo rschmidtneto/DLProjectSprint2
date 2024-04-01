@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'DLproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'DLDataBase',
+        'NAME': 'dldatabase',
         'USER' : 'root',
         'PASSWORD' : 'root', 
         'HOST' : 'localhost',
