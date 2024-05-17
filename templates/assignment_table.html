@@ -1,0 +1,55 @@
+<style>
+   
+    .calendar-table {
+        width: 75%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        text-align: center;
+    }
+    .calendar-table th, .calendar-table td {
+        text-align: center;
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+    }
+    .calendar-table th {
+        background-color: #f8f9fa;
+        color: #333;
+    }
+    .calendar-table tbody tr:hover {
+        background-color: #e9ecef;
+    }
+    .employee-name {
+        color: #007bff;
+        text-decoration: none;
+    }
+    .employee-name:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<h2>Weekly Assignment from {{week_start|date:"d M Y"}}</h2>
+<table class="calendar-table">
+    <thead>
+      <tr>
+        <th scope="col" style="width: 25rem;">Name</th>
+        <th scope="col" style="width: 10rem;">All times entered:</th>
+    </thead>
+    <tbody>
+        {% for employee, data in employee_assignments.items %}
+            <tr>
+                <td>
+                    <a class="employee-name" href="#" data-bs-toggle="modal" data-bs-target="#viewBooking" data-bs-url="{% url 'assignment_employee_details' employee.employee_id %}">
+                        {{ employee.name }}
+                    </a>
+                </td>
+                <td>
+                    {% if data.all_times_entered %}
+                        <span>&#10003;</span> 
+                    {% else %}
+                        <span>&#10007;</span> 
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

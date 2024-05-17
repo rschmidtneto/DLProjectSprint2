@@ -1,0 +1,43 @@
+<h2>Jobs to be invoiced from {{week_start|date:"d/m"}} to {{period_end|date:"d/m/Y"}}</h2>
+<table class="calendar-table">
+    <thead>
+        <tr>
+            <th scope="col">PO Name:</th>
+            <th scope="col">All times entered:</th>
+            <th scope="col">Invoice sent:</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for job, data in job_assignments.items %}
+            <tr>
+                <td>
+                    <a class="po_name" href="#" data-bs-toggle="modal" data-bs-target="#viewBooking" data-bs-url="{% url 'invoice-details' data.job_id %}">
+                   <!-- <a href="{% url 'invoice-details' data.job_id %}" target="_blank" onclick="openInvoiceDetails(this.href); return false;"> this seems to work better but the script is not working -->
+                        {{ job }}
+                    </a>
+                </td>
+                <td>    
+                    {% if data.all_times_entered %}
+                        <span>&#10003;</span> 
+                    {% else %}
+                        <span>&#10007;</span> 
+                    {% endif %}
+                </td>
+                <td>
+                    {% if data.invoiced %}
+                        <span>&#10003;</span> 
+                    {% else %}
+                        <span>&#10007;</span> 
+                    {% endif %}
+                </td>    
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<script>
+function openInvoiceDetails(url) {
+    window.open(url, 'InvoiceDetails', 'height=794,width=1123,left=100,top=100,resizable=yes,scrollbars=yes');
+}
+</script>

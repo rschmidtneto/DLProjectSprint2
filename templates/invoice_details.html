@@ -1,0 +1,284 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en"> <!-- For the CSS you can try the invoice.css and check what is the best option -->
+<link rel="stylesheet" href="{% static 'website/css/invoice1.css' %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Invoice</title>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class ="logo">
+            <img src="{% static 'website/images/logo_white.png' %}" alt="DL Logo" width="300"  >
+        </div>
+
+        <div class="bussiness-details">
+            <h3>TAX INVOICE</h3><BR>
+            <BR>
+            <p>DL AUSTRALIA GROUP PTY LTD</p>
+            <p>ABN: 90637031139</p>
+            <p>105 Arun Drive</p>
+            <p>Arundel, QLD, 4214</p>
+            <p>Tel: 0415540088</p>
+            <p>Email: adm@dlausgroup.com.au</p>
+            <br><h3>BILL TO:</h3><br>
+            <p>{{ client.client_name}}</p>
+            <p>ABN:{{ client.client_abn }}</p>
+            <p>{{ client.address }}</p>
+        </div>
+
+        <div class="invoice-details">
+            <p>TAX INVOICE: {{ invoice_id }} </p>
+            <p>PO#: {{ job.po_name }} </p>
+            <p>SITE ADDRESS: {{ job.address }}</p>
+            <p>PERIOD From: {{week_start|date:"d/m"}} to {{period_end|date:"d/m/Y"}} </p>
+            <p>PAYMENT TERMS: Due upon receipt</p>
+            <p>DUE DATE: {{ duedate |date:"d/m/Y"}} </p>
+        </div>
+    </div>
+    <form id="invoicesForm" method="post">
+    <div name="invoice-description">
+        
+        <table id="invoiceTable" class="calendar-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Employee</th>
+                <th>Start Time</th>
+                <th>Finish Time</th>
+                <th>Lunch (hrs)</th>
+                <th>Worked Hours</th>
+                <th>Regular</th>
+                <th>1.5x</th>
+                <th>2x</th>
+                <th>Price</th>
+                <th>Price 1.5x</th>
+                <th>Price 2x</th>
+                <th>Travel</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assignment in assignments %}
+            <tr data-index="{{ forloop.counter }}" class="calculation-row">
+                <td>{{ assignment.date|date:"d-m-Y" }}</td>
+                <td>{{ assignment.job_role.role_description }}</td>
+                <td>{{ assignment.employee.name }}</td>
+                <td><input type="text" name="start_time_{{ forloop.counter }}" maxlength="4" size="4" value="{{ assignment.start_time|date:'H:i' }}" ></td>
+                <td><input type="text" name="finish_time_{{ forloop.counter }}" maxlength="4" size="4" value="{{ assignment.finish_time|date:'H:i' }}"/></td>
+                <td><input type="text" step="0.25" name="lunch_hours_{{ forloop.counter }}" maxlength="4" size="4" value="{{ assignment.lunch_hours }}"/></td>
+                <td><input type="text" size="4" class="worked_hours" name="worked_hours_{{ forloop.counter }}" maxlength="4" size="4" value="{{ assignment.worked_hours }}"></td>
+                <td><input type="text" size="4" class="regular_hours" name="regular_hours_{{ forloop.counter }}" maxlength="4" size="4" value="{{ assignment.regular_hours }}" ></td>
+                <td><input type="text" size="4" class="overtime_1_5x" name="overtime_1_5x_{{ forloop.counter }}" maxlength="4" size="4" value="{{ assignment.timeandhalf_hours }}" ></td>
+                <td><input type="text" size="4" class="overtime_2x" name="overtime_2x_{{ forloop.counter }}" maxlength="4" size="4" value="{{ assignment.double_hours}}" ></td>
+                <td><input type="text" size="4"  name="rate" maxlength="4" size="4" value="{{ assignment.job_role.rate }}"></td>
+                <td><input type="text" size="4"  name="rate_1_5x" maxlength="4" size="4" value="{{ assignment.job_role.rate_1_5x|default_if_none:assignment.job_role.rate }}"></td>
+                <td><input type="text" size="4"  name="rate_2x" maxlength="4" size="4" value="{{ assignment.job_role.rate_2x|default_if_none:assignment.job_role.rate_1_5x|default_if_none:assignment.job_role.rate }}"></td>
+                <td><input type="text" size="4"  name="travel_rate" maxlength="4" size="4" value="{{ assignment.job_role.travel|default_if_none:'0.00' }}"></td>
+                <td> <input type="text" size="5" class="total_pay" name="total_pay_{{ forloop.counter }}" value="" readonly></td>
+                <td> <input type="hidden" size="5" class="total_cost" name="total_cost_{{ forloop.counter }}" value="{{ assignment.total_cost}}" readonly></td>
+                <td><input type="hidden" name="assignment_id_{{ forloop.counter }}" value="{{ assignment.job_assignment_id }}"></td>
+            </tr>
+            {% endfor %}
+            <!--<tr>
+                <td><input type="text" name="extras_description" placeholder="Date" /></td>
+                <td><input type="text" name="extras_description" placeholder="Description of Extra" /></td>
+                <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                <td><input type="text" size="4" name="extras_total" id="extras_total" placeholder="Amount" onchange="calculateFinalTotal()" /></td>
+            </tr> -->
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Total Hours:</td>
+                <td><input type="text" size="4" id="total_worked_hours" name="total_worked_hours" value=""></td>
+                <td><input type="text" size="4" id="total_regular_hours" name="total_regular_hours" value=""></td> 
+                <td><input type="text" size="4" id="total_1_5x_hours" name="total_1_5x_hours" value=""></td>
+                <td><input type="text" size="4" id="total_2x_hours" name="total_2x_hours" value=""></td>
+            </tr>
+    <tr>
+            <tr>
+        <td>Subtotal (AUD)</td>
+        <td><input type="text" id="subtotal" name="subtotal" size="6" value=""></td>
+    </tr>
+    <tr>
+        <td>GST (AUD)</td>
+        <td><input type="text" id="gst" name="gst" size="6" value=""></td>
+    </tr>
+    <tr>
+        <td>TOTAL (AUD)</td>
+        <td><input type="text" id="total_aud" name="total_aud" size="6" value=""></td>
+        <td><input type="hidden" id="cost-total" name="cost-total" size="6" value="0.00"></td>
+    </tr>
+        </tbody>
+        
+        <input type="hidden" name="job_id" value="{{ job.job_id }}">
+        <input type="hidden" name="invoice_subtotal" id="invoice_subtotal">
+        <input type="hidden" name="invoice_total" id="invoice_total">
+        <input type="hidden" name="due_date" value="{{ duedate|date:'d/m/Y' }}">
+        <input type="hidden" name="invoice_from_date" value="{{ week_start|date:'d/m/Y' }}">
+        <input type="hidden" name="invoce_to_date" value="{{ period_end|date:'d/m/Y' }}">
+     </form>   
+    </table>
+    </div>
+        <button class="no-print" onclick="window.print();">Print this page</button>
+    </div>
+    <footer>
+    {% if assignments %}<button type="button" id="submitInvoiceForm" class="no-print">Save Changes</button> {% endif %}
+    </footer>
+    
+    </body>
+    </html>
+    
+
+
+<script>
+
+
+
+
+
+
+ 
+
+
+// Define the update invoice table function
+function updateInvoiceTable() {
+    const weekStart = $('#week_start').val();
+    const period_end = $('#period_end').val();
+    const selectedState = $('input[name="btnradio"]:checked').val();
+    const url = "{% url 'invoice' %}";
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        data: {
+            'week_start': weekStart,
+            'period_end': period_end,
+            'state': selectedState
+        },
+        success: function(response) {
+            $('#invoiceTable').html(response);
+            
+        },
+        error: function() {
+            alert('There was an error updating the invoice table. Please try again.');
+        }
+    });
+}
+
+
+$(document).ready(function() {
+    
+    // Calculate everything when the page loads and anytime an input changes
+    calculateEverything();
+
+    // Event listener for any input change in the invoice table
+    $('#invoiceTable tbody .calculation-row').each(function(index, element) {
+        calculateEverything();
+        
+    });
+
+    // Calculate final total when extras change
+    $('#extras_total').on('input', function() {
+        calculateFinalTotal();
+    });
+
+     $('#submitInvoiceForm').click(function(e) {
+        e.preventDefault();
+
+        // Manually update hidden fields before submitting
+        $('#invoice_subtotal').val($('#subtotal').val());
+        $('#invoice_total').val($('#total_aud').val());
+
+        var formData = new FormData($('#invoicesForm')[0]);  // Reference the correct form ID
+        var postUrl = "{% url 'create-invoice' %}";
+
+        $.ajax({
+            url: postUrl,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+              "X-CSRFToken": $("meta[name='csrf-token']").attr("content")
+            },
+            success: function(response) {
+                alert('Invoice saved!');
+                $('#viewBooking').modal('hide');
+                updateInvoiceTable();
+            },
+            error: function(xhr, status, error) {
+                alert('Error saving this invoice: ' + error);
+            }
+        });
+    });
+});
+
+
+function calculateEverything() {
+    let totalWorkedHours = 0;
+    let totalRegularHours = 0;
+    let totalOvertime1_5Hours = 0;
+    let totalOvertime2Hours = 0;
+    let subtotal = 0;
+    let totalCost = 0;
+
+    $('#invoiceTable tbody tr').each(function(index, element) {
+        const $row = $(element);
+
+        // Check if the row has the necessary inputs before proceeding
+        if ($row.find('input.regular_hours').length) {
+            const regularHours = parseFloat($row.find('.regular_hours').val()) || 0;
+            const overtime1_5xHours = parseFloat($row.find('.overtime_1_5x').val()) || 0;
+            const overtime2xHours = parseFloat($row.find('.overtime_2x').val()) || 0;
+            const travelRate = parseFloat($row.find('[name^="travel_rate"]').val()) || 0;
+
+            const rate = parseFloat($row.find('[name="rate"]').val().replace('$', '')) || 0;
+            const rate1_5x = parseFloat($row.find('[name="rate_1_5x"]').val().replace('$', '')) || rate;
+            const rate2x = parseFloat($row.find('[name="rate_2x"]').val().replace('$', '')) || rate1_5x;
+
+            const totalPay = (regularHours * rate) + (overtime1_5xHours * rate1_5x) + (overtime2xHours * rate2x) + travelRate;
+            $row.find('.total_pay').val(totalPay.toFixed(2));
+
+            const rowTotalCost = parseFloat($row.find('[name^="total_cost"]').val()) || 0;
+
+            // Ensure total hours 
+            totalWorkedHours += regularHours + overtime1_5xHours + overtime2xHours;
+            totalRegularHours += regularHours;
+            totalOvertime1_5Hours += overtime1_5xHours;
+            totalOvertime2Hours += overtime2xHours;
+            subtotal += totalPay;
+            totalCost += rowTotalCost;
+        }
+    });
+
+    // Update totals in the footer
+    $('#total_worked_hours').val(totalWorkedHours.toFixed(2));
+    $('#total_regular_hours').val(totalRegularHours.toFixed(2));
+    $('#total_1_5x_hours').val(totalOvertime1_5Hours.toFixed(2));
+    $('#total_2x_hours').val(totalOvertime2Hours.toFixed(2));
+    $('#cost-total').val(totalCost.toFixed(2));
+
+    $('#subtotal').val(subtotal.toFixed(2));
+    const gst = subtotal * 0.10; // Assuming GST is 10%
+    $('#gst').val(gst.toFixed(2));
+    calculateFinalTotal();
+}
+
+function calculateFinalTotal() {
+    const subtotal = parseFloat($('#subtotal').val()) || 0;
+    const gst = parseFloat($('#gst').val()) || 0;
+    const extras = parseFloat($('#extras_total').val()) || 0;
+    const total = subtotal + gst + extras;
+    $('#total_aud').val(total.toFixed(2));
+}
+
+
+
+</script>

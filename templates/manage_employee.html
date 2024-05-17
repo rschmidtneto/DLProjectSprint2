@@ -1,0 +1,234 @@
+
+<div class="card" id="jobRoleFormCard" style="border: none;">
+        <div class="card-body">
+            <h5 class="card-title detail-name" style="font-family: 'Ubuntu', sans-serif; margin: 2rem 0;">{% if form.instance.pk %}Edit Employee{% else %}Add New Employee{% endif %}</h5>
+                <form method="post" action="{% if form.instance.pk %}{% url 'edit_employee' form.instance.pk %}{% else %}{% url 'add_employee' %}{% endif %}" >
+                    {% csrf_token %}
+                    
+
+                        <div class="employee-form">
+                            <ul>
+                                <li><label for="id_name">Name</label>{{ form.name }}</li>
+                                <li><label for="id_phone">Phone</label>{{ form.phone }}</li>
+                                <li><label for="id_email">Email</label>{{ form.email }}</li>
+                                <li><label for="id_nextOfKin">Next of kin</label>{{ form.nextOfKin }}</li>
+                                <li><label for="id_xero_id">Xero id</label>{{ form.xero_id }}</li>
+                                <li class="employee-form-days"><label for="id_days_worked">Worked Days</label>{{form.days_worked}}</li>
+                                <li class="employee-form-days"><label for="id_missed_days">Missed Days</label>{{form.missed_days}}</li>
+                                <li><label for="id_visa_type">Visa type</label>{{ form.visa_type }}</li>
+                                <li><label for="id_visa_expiry_date">Visa expiry date</label>{{ form.visa_expiry_date }}</li>
+                                <li style="border-top: 1px dotted black; flex-direction: column;"><label id="job_select">Job select</label>
+                                    <ul class="job-select-ul">
+                                        <li><label for="id_general_labour" class="m-auto">General Labour</label>{{form.general_labour}}</li>
+                                        <li>{{form.general_labour_document}}</li>
+                                        <li>{{form.general_labour_expiry}}</li>
+
+                                        <li><label for="id_traffic_controller" class="m-auto">Traffic Controller</label>{{form.traffic_controller}}</li>
+                                        <li>{{form.traffic_controller_document}}</li>
+                                        <li>{{form.traffic_controller_expiry}}</li>
+
+                                        <li><label for="id_first_aider" class="m-auto">First Aider</label>{{form.first_aider}}</li>
+                                        <li>{{form.first_aider_document}}</li>
+                                        <li>{{form.first_aider_expiry}}</li>
+
+                                        <li><label for="id_construction_cleaner" class="m-auto">Construction Cleaner</label>{{form.construction_cleaner}}</li>
+                                        <li>{{form.construction_cleaner_document}}</li>
+                                        <li>{{form.construction_cleaner_expiry}}</li>
+
+                                        <li><label for="id_boom_lift" class="m-auto">Boom Lift</label>{{form.boom_lift}}</li>
+                                        <li>{{form.boom_lift_document}}</li>
+                                        <li>{{form.boom_lift_expiry}}</li>
+
+                                        <li><label for="id_telehandler" class="m-auto">Telehandler</label>{{form.telehandler}}</li>
+                                        <li>{{form.telehandler_document}}</li>
+                                        <li>{{form.telehandler_expiry}}</li>
+
+                                        <li><label for="id_forlift_driver" class="m-auto">Forklift Driver</label>{{form.forklift_driver}}</li>
+                                        <li>{{form.forklift_driver_document}}</li>
+                                        <li>{{form.forklift_driver_expiry}}</li>
+
+                                        <li><label for="id_hoister_driver" class="m-auto">Hoister Driver</label>{{form.hoister_driver}}</li>
+                                        <li>{{form.hoister_driver_document}}</li>
+                                        <li>{{form.hoister_driver_expiry}}</li>
+                                    </ul>
+                                </li>
+
+                            </ul>
+                            <!-- <div class="d-flex align-item-center justify-content-center">
+                                <button type="button" class="job-add-btn me-2" onclick="addJob()">Add Job Role and Docs</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div> -->
+                        </div>
+                    
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+        </div>
+</div>                
+
+{% comment %} 
+
+<h2 style="font-family: 'Ubuntu', sans-serif;">{% if form.instance.pk %}Edit Employee{% else %}Add New Employee{% endif %}</h2>
+<form id="employeeForm" method="post" action="{% if form.instance.pk %}{% url 'edit_employee' form.instance.pk %}{% else %}{% url 'add_employee' %}{% endif %}" >
+    {% csrf_token %}
+    <div class="employee-form">
+        <ul>
+            <li><label for="id_name">Name</label>{{ form.name }}</li>
+            <li><label for="id_phone">Phone</label>{{ form.phone }}</li>
+            <li><label for="id_email">Email</label>{{ form.email }}</li>
+            <li><label for="id_nextOfKin">Next of kin</label>{{ form.nextOfKin }}</li>
+            <li><label for="id_xero_id">Xero id</label>{{ form.xero_id }}</li>
+            <li><label for="id_days_worked">Worked Days</label>{{form.days_worked}}</li>
+            <li><label for="id_missed_days">Missed Days</label>{{form.missed_days}}</li>
+            <li><label for="id_visa_type">Visa type</label>{{ form.visa_type }}</li>
+            <li><label for="id_visa_expiry_date">Visa expiry date</label>{{ form.visa_expiry_date }}</li>
+            <li style="border-top: 1px dotted black;"><label id="job_select">Job select</label></li>
+        </ul>
+        <div class="d-flex align-item-center justify-content-center">
+            <button type="button" class="job-add-btn me-2" onclick="addJob()">Add Job Role and Docs</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</form>
+
+<script>
+$(document).ready(function() {
+    $('#employeeForm').submit(function(e) {
+        e.preventDefault(); // Prevent default form submission
+        var form = $(this);
+        var url = form.attr('action');
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+              "X-CSRFToken": $("meta[name='csrf-token']").attr("content")
+            },
+            success: function(data)
+            {
+                $('#employeeModal').modal('hide');
+                alert('Employee saved successfully!');
+            },
+            error: function(xhr, textStatus, errorThrown)
+            {
+                // Replace the modal's body with the returned HTML which contains the form with errors
+                $('#employeeModal .modal-body').html(xhr.responseText);
+            }
+        });
+    });
+});
+
+    function updateDocument(select) {
+        var selectedValue = select.value;
+        var documentLi = select.closest('li').querySelector('.document_li');
+
+        switch (selectedValue) {
+        case 'General Labour':
+            documentLi.innerHTML = '{{ form.general_labour_document }}';
+            break;
+        case 'Traffic Controller':
+            documentLi.innerHTML = '{{ form.traffic_controller_document }}';
+            break;
+        case 'First Aider':
+            documentLi.innerHTML = '{{ form.first_aider_document }}';
+            break;
+        case 'Construction Cleaner':
+            documentLi.innerHTML = '{{ form.construction_cleaner_document }}';
+            break;
+        case 'Boom Lift':
+            documentLi.innerHTML = '{{ form.boom_lift_document }}';
+            break;
+        case 'Telehandler':
+            documentLi.innerHTML = '{{ form.telehandler_document }}';
+            break;
+        case 'Forklift Driver':
+            documentLi.innerHTML = '{{ form.forklift_driver_document }}';
+            break;
+        case 'Hoister Driver':
+            documentLi.innerHTML = '{{ form.hoister_driver_document }}';
+            break;
+        // 다른 옵션에 대한 처리 추가
+        default:
+            documentLi.innerHTML = ''; // 선택이 'Select'인 경우 폼 필드 비우기
+    }
+    }
+
+    function updateDate(select) {
+        var selectedValue = select.value;
+        var dateLi = select.closest('li').querySelector('.expiry_date_li');
+
+        switch (selectedValue) {
+        case 'General Labour':
+            dateLi.innerHTML = '{{ form.general_labour_expiry }}';
+            break;
+        case 'Traffic Controller':
+            dateLi.innerHTML = '{{ form.traffic_controller_expiry }}';
+            break;
+        case 'First Aider':
+            dateLi.innerHTML = '{{ form.first_aider_expiry }}';
+            break;
+        case 'Construction Cleaner':
+            dateLi.innerHTML = '{{ form.construction_cleaner_expiry }}';
+            break;
+        case 'Boom Lift':
+            dateLi.innerHTML = '{{ form.boom_lift_expiry }}';
+            break;
+        case 'Telehandler':
+            dateLi.innerHTML = '{{ form.telehandler_expiry }}';
+            break;
+        case 'Forklift Driver':
+            dateLi.innerHTML = '{{ form.forklift_driver_expiry }}';
+            break;
+        case 'Hoister Driver':
+            dateLi.innerHTML = '{{ form.hoister_driver_expiry }}';
+            break;
+        // 다른 옵션에 대한 처리 추가
+        default:
+            dateLi.innerHTML = ''; // 선택이 'Select'인 경우 폼 필드 비우기
+    }
+    }
+
+    function addJob() {
+    var employeeForm = document.querySelector(".employee-form ul");
+    if (employeeForm) {
+        var newJobLi = document.createElement("li");
+        newJobLi.innerHTML = `
+            <div class="new-job">
+                <select name="job_role[]" class="job_select" onchange="updateDocument(this), updateDate(this)">
+                    <option>Select</option>
+                    <option value="General Labour">General Labour</option>
+                    <option value="Traffic Controller">Traffic Controller</option>
+                    <option value="First Aider">First Aider</option>
+                    <option value="Construction Cleaner">Construction Cleaner</option>
+                    <option value="Boom Lift">Boom Lift</option>
+                    <option value="Telehandler">Telehandler</option>
+                    <option value="Forklift Driver">Forklift Driver</option>
+                    <option value="Hoister Driver">Hoister Driver</option>
+                </select>
+                <div>
+                    <label>Document</label>
+                    <input type="text" name="job_document[]" class="document_li">
+                </div>
+                <div>
+                    <label>Expiry date</label>
+                    <input type="date" name="job_expiry[]" class="expiry_date_li">
+                </div>
+                <button type="button" class="close-job-btn" onclick="removeJob(this)">X</button>
+            </div>
+        `;
+        employeeForm.appendChild(newJobLi);
+    } else {
+        console.error("Employee form or job_select element not found");
+    }
+}
+
+    function removeJob(button) {
+    var jobLi = button.parentElement;
+    jobLi.remove();
+    }
+
+    
+
+</script> {% endcomment %}

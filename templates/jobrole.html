@@ -1,0 +1,152 @@
+<div class="dropdown-center">
+  <button class="btn btn-secondary dropdown-toggle" id="dropdown-name" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+    {% if schedule %} {{ schedule.job_role.role_description }} {% else %}  Select a role: {% endif %}
+  </button>
+  {% include 'jobrole_replace.html' %}
+</div>
+
+<div id="selected-role">
+    <input type="hidden" id="job_id" value="{% if schedule %}{{schedule.job_id}}{% endif %}" required>
+    <input type="hidden" id="id-jobrole" value="" required>
+    <div class="detail-rate">
+      <div>
+        <p>Rate: </p>
+        <input id="rate-employee" type="text" readonly {% if schedule %} value="{{ schedule.job_role.rate }}" {% endif %}>
+      </div>
+      <div>
+        <p>x1.5: </p>
+        <input id="rate15-employee" type="text" readonly {% if schedule %} value="{{ schedule.job_role.rate_1_5x }}" {% endif %}>
+      </div>
+      <div>
+        <p>x2: </p>
+        <input id="rate2-employee" type="text" readonly {% if schedule %} value="{{ schedule.job_role.rate_2x }}" {% endif %}>
+      </div>
+    </div><br>
+    <div class="detail-rate">
+      <div>
+        <p>Pay: </p>
+        <input id="pay-employee" type="text" readonly{% if schedule %} value="{{ schedule.job_role.pay }}" {% endif %}>
+      </div>
+      <div>
+        <p>x1.5: </p>
+        <input id="pay15-employee" type="text" readonly {% if schedule %} value="{{ schedule.job_role.pay_1_5x }}" {% endif %}>
+      </div>
+      <div>
+        <p>x2: </p>
+        <input id="pay2-employee" type="text" readonly{% if schedule %} value="{{ schedule.job_role.pay_2x }}" {% endif %}>
+      </div>
+    </div> <br> 
+    <div class="detail-rate">
+      <div>
+        <p>Travel Rate: </p>
+        <input id="travel-employee" size="4" type="text" readonly {% if schedule %} value="{{ schedule.job_role.travel }}" {% endif %}>
+      </div>
+      <div>
+        <p>Travel Pay: </p>
+        <input id="travel-pay-employee" size="4" type="text" readonly {% if schedule %} value="{{ schedule.job_role.travel_pay }}" {% endif %}>  
+      </div>
+    </div><br>
+    <div id="bookingDate"><p>Date: </p><span class="detail-date">{{date_obj| date:"d/m/Y" }}<br> </div>
+    {% if not schedule %}   
+    <div class="detail-note">
+    <input type="checkbox" id="multi-day-checkbox"> Multi-day booking?
+    </div>
+    <div class="detail-note">
+        <div id="multi-day-options" style="display: none;">
+            <select id="day-range-select">
+                <option value="mon-fri">Weekdays</option>
+                <option value="mon-sat">Weekdays and Saturday</option>
+                <option value="sun-sat">Weekdays and Weekend</option>
+            </select>
+              <p>Pick last day for booking: <input type="date" id="end-date"> </p>
+        </div>
+    </div>
+    {% endif %}
+    <div class="detail-note">
+      <p>Notes: </p>
+      <input id="notes" type="text" {% if schedule.notes %} value="{{ schedule.notes }}"{% else %} placeholder = "There is no notes for this schedule" {% endif %}>
+    </div>
+    {% if schedule %} 
+    <div class="card-body">
+      <button type="submit" id="saveChangesBtn" class="btn btn-secondary" data-bs-url="{% url 'editBooking' schedule.job_assignment_id %}" style="display: none;">Save Changes</button>
+      <button type="button" class="btn btn-danger deleteBooking" data-bs-url="{% url 'deleteBooking' schedule.job_assignment_id %}">Delete</button>
+    </div>
+    {% else %}
+    <div class="detail-save-btn">
+      <button type="button" id="submitBooking" class="btn btn-secondary">Save</button>
+    </div>
+    {% endif %}
+</div> 
+
+<script>
+$(document).ready(function() {
+    const job_id = $("#job_id"); // Job ID
+    const date = $('#booking_date'); // Date for booking
+    const roles_div = $('.dropdown-menu'); // UL to be replaced
+    const url = '/getJobRoles/'; // Endpoint URL
+    const delay_by_in_ms = 700; // Delay before the search
+    let scheduled_function = false; // Scheduled function for delayed execution
+
+    
+    
+    function searchJobRole() {
+        $.ajax({
+            url:{% if schedule %} "{% url 'getJobRoles' schedule.job_id %}", {% else %} url + job_id.val(), {% endif %}
+            type: 'GET',
+            data: {
+            },
+            success: function(response) {
+                roles_div.html(response); 
+                $('.jobRole-result').click(function() {
+                  console.log(response)
+                
+                
+                
+    });
+            },
+            error: function() {
+                alert('Please try again.');
+                
+            }
+        });
+    }
+
+    
+    
+    $('.dropdown-menu').on('click', '.jobRole-result', function(event) {
+        event.preventDefault();
+        var role = $(this).data('bs-role-value');
+        $('#role-employee').val(role).change();
+
+        var dropdownName = $(this).data('bs-role-value');
+        $('#dropdown-name').text(dropdownName).change();
+        
+        var pay = $(this).data('bs-pay-value');
+        var pay15 = $(this).data('bs-pay15-value');
+        var pay2 = $(this).data('bs-pay2-value');
+        var rate = $(this).data('bs-rate-value');
+        var rate15 = $(this).data('bs-rate15-value');
+        var rate2 = $(this).data('bs-rate2-value');
+        var travel = $(this).data('bs-travel-value');
+        var travelpay = $(this).data('bs-travel-pay-value');
+        var jobRoleid = $(this).data('bs-jobroleid-value');
+        
+        
+        
+        $('#rate-employee').val(rate).change();
+        $('#rate15-employee').val(rate15).change();
+        $('#rate2-employee').val(rate2).change();
+        $('#pay-employee').val(pay).change();
+        $('#pay15-employee').val(pay15).change();
+        $('#pay2-employee').val(pay2).change();
+        $('#travel-employee').val(travel).change(); 
+        $('#travel-pay-employee').val(travelpay).change(); 
+        $('#id-jobrole').val(jobRoleid).change();
+        
+    
+});
+
+
+   
+});
+</script>

@@ -1,0 +1,171 @@
+{% extends 'base.html'%}
+{% block content %}
+{% if user.is_authenticated %}
+
+<style>
+
+    .state-selection {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: 19.7rem;
+    }
+  
+    .btn-check {
+        display: none;
+    }
+  
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .state-selection {
+            flex-direction: column; /* Stack items vertically on small screens */
+        }
+    }
+  </style>
+
+<div class="main-content">
+    <div class="weekly-bookings">
+        <div class="bookings-header">
+                <div class="btn-group state-selection" role="group" aria-label="Basic radio toggle button group">
+                    <input type="radio" class="btn-check" name="btnradio" id="HOTNSW" value="HOTNSW" autocomplete="off" >
+                    <label class="state-button" for="HOTNSW">HOT NSW</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="NSW" value="NSW" autocomplete="off" checked >
+                    <label class="state-button" for="NSW">NSW</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="VIC" value="VIC" autocomplete="off"  >
+                    <label class="state-button" for="VIC">VIC</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="QLD" value="QLD" autocomplete="off" >
+                    <label class="state-button" for="QLD">QLD</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="WA" value="WA" autocomplete="off" >
+                    <label class="state-button" for="WA">WA</label>
+                    <label for="week_start">From (Monday):</label>
+                    <input type="date" class="date-picker" id="week_start" name="week_start" required onchange="validateMonday1(this)">
+                    <label for="period_end">To (Sunday):</label>
+                    <input type="date" class="date-picker" id="period_end" name="period_end" required onchange="validateSunday1(this)">             
+        </div>        
+    </div>
+    <div id="invoiceTable">
+        {% include 'invoice_table.html' %}
+    </div>
+    
+<div>
+
+
+
+<!--Modal for a pop-up to display details -->
+
+
+<div class="modal fade modal-lg" id="viewBooking" tabindex="-1" aria-labelledby="viewBookingLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewBookingLabel">Details</h5>
+      </div>
+      <div class="modal-body d-flex justify-content-center">
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+
+// Attach a change event listener to your radio buttons
+$('input[name="btnradio"]').change(function() {
+    updateInvoiceTable();
+});
+
+// Attach a change event listener to period start
+$('#week_start').change(function() {
+   validateMonday1(this);
+   updateInvoiceTable();
+});
+
+// Attach a change event listener to period end
+$('#period_end').change(function() {
+    validateSunday1(this);
+    updateInvoiceTable();
+});
+
+// Define the validateMonday function
+function validateMonday1(input) {
+    const selectedDate = new Date(input.value);
+    if (selectedDate.getDay() !== 1) { // 1 is Monday
+        alert('Please select a Monday.');
+        input.value = ''; // Clear the incorrect selection
+    }
+}
+
+// Define the validateSunday function
+function validateSunday1(input) {
+    const selectedDate = new Date(input.value);
+    if (selectedDate.getDay() !== 0) { // 
+        alert('Please select a Sunday.');
+        input.value = ''; // Clear the incorrect selection
+    }
+}
+
+// Define the update invoice table function
+function updateInvoiceTable() {
+    const weekStart = $('#week_start').val();
+    const period_end = $('#period_end').val();
+    const selectedState = $('input[name="btnradio"]:checked').val();
+    const url = "{% url 'invoice' %}";
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        data: {
+            'week_start': weekStart,
+            'period_end': period_end,
+            'state': selectedState
+        },
+        success: function(response) {
+            $('#invoiceTable').html(response);
+            
+        },
+        error: function() {
+            alert('There was an error updating the invoice table. Please try again.');
+        }
+    });
+}
+
+
+
+$(document).ready(function() {
+   
+    $(document).on('click', 'a[data-bs-toggle="modal"]', function(e) {
+        e.preventDefault(); 
+        const weekStart = $('#week_start').val();
+        const period_end = $('#period_end').val();
+        var url = $(this).data('bs-url') + '?week_start=' + weekStart + '&period_end=' + period_end;  
+       
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                $('#viewBooking .modal-body').html(response);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", xhr.responseText)
+            }
+        });
+    });
+
+    
+});
+
+
+
+</script>
+{% endif %}
+{% endblock %}

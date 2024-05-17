@@ -1,0 +1,18 @@
+
+<form method="post" action="{% url 'addJob' %}">
+{% csrf_token %}
+<div class="card" style="width: 18rem;">
+    <div class="card-boSize">
+      <h5 class="card-title detail-name" style="font-family: 'Ubuntu', sans-serif;">Add New Job</h5>
+    </div>
+    <ul class="list-group list-group-flush detail-add-job">
+    {{ form.as_ul }} 
+    </ul>
+    <button type="submit" class="btn btn-primary detail-add-job-btn" onclick="return confirmJobCreation();">Submit</button>
+</form>
+
+<script>
+function confirmJobCreation() {
+    return confirm('Are you sure you want to create this job?');
+}
+</script>

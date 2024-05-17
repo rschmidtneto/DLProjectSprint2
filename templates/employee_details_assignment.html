@@ -1,0 +1,252 @@
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f4;
+    }
+
+    table.calendar-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        background-color: #fff;
+    }
+
+    table.calendar-table th, table.calendar-table td {
+        border: 1px solid #ddd;
+        padding: 8px 16px;
+        text-align: left;
+    }
+
+    table.calendar-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+
+    table.calendar-table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    input[type="time"], input[type="number"], input[type="text"] {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 4px 8px;
+        width: 100%;
+    }
+
+    input[type="file"] {
+        margin-top: 10px;
+    }
+
+    button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin-top: 10px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    form {
+        margin-top: 20px;
+    }
+</style>
+
+
+<form id="assignmentsForm" method="post">
+    <table id="assignmentsTable" class="calendar-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Start Time</th>
+            <th>Finish Time</th>
+            <th>Lunch (hrs)</th>
+            <th>Worked Hours</th>
+            <th>Regular</th>
+            <th>1.5x</th>
+            <th>2x</th>
+            <th>Price</th>
+            <th>Price 1.5x</th>
+            <th>Price 2x</th>
+            <th>Travel</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for assignment in assignments %}
+        <tr data-index="{{ forloop.counter }}">
+            <td>{{ assignment.date|date:"d-m-Y" }}</td>
+            <td>{{ assignment.job_role.role_description }}</td>
+            <td>
+            <input type="hidden" name="assignment_id_{{ forloop.counter }}" value="{{ assignment.job_assignment_id }}">
+            <input type="time" name="start_time_{{ forloop.counter }}" value="{% if assignment.start_time %}{{ assignment.start_time|date:'H:i' }}{% else %}07:00{% endif %}" required onchange="calculateRow(this)"/></td>
+            <td><input type="time" name="finish_time_{{ forloop.counter }}" value="{% if assignment.finish_time %}{{ assignment.finish_time|date:'H:i' }}{% else %}15:30{% endif %}" required onchange="calculateRow(this)"/></td>
+            <td><input type="number" step="0.25" name="lunch_hours_{{ forloop.counter }}" maxlength="4" size="4" value="{% if assignment.lunch_hours %}{{ assignment.lunch_hours }}{% else %}0.5{% endif %}" required onchange="calculateRow(this)"/></td>
+            <td>
+                <input type="text" size="4" class="worked_hours" name="worked_hours_{{ forloop.counter }}" value="">
+            </td>
+            <td>
+                <input type="text" size="4" class="regular_hours" name="regular_hours_{{ forloop.counter }}" value="" >
+            </td>
+            <td>
+                <input type="text" size="4" class="overtime_1_5x" name="overtime_1_5x_{{ forloop.counter }}" value="" >
+            </td>
+            <td>
+                <input type="text" size="4" class="overtime_2x" name="overtime_2x_{{ forloop.counter }}" value="" >
+            </td>
+            <td>${{ assignment.job_role.pay }}</td>
+            <td> ${{ assignment.job_role.pay_1_5x|default_if_none:assignment.job_role.pay }}</td>
+            <td> ${{ assignment.job_role.pay_2x|default_if_none:assignment.job_role.pay_1_5x|default_if_none:assignment.job_role.pay }}</td>
+            <td>${{ assignment.job_role.travel_pay|default:"0.00" }}</td>
+            <td>
+                <input type="text" size="4" class="total_pay" name="total_pay_{{ forloop.counter }}" value="" readonly>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    <button type="button" onclick="submitAssignmentsForm()">Save Changes</button>
+<div>    
+</form>
+<form id="timesheet-form" method="post" enctype="multipart/form-data">
+ {% csrf_token %}
+    <input type="hidden" name="employee_id" value="{{ employee_id }}">
+    <input type="hidden" name="week_start" value="{{ week_start|date:'Y-m-d' }}">
+    <label for="timesheet_file">Upload Timesheet:</label>
+    <input type="file" id="timesheet_file" name="timesheet_file" required>
+    {% for assignment in assignments %}
+    <input type="hidden" name="assignment_ids" value="{{ assignment.job_assignment_id }}">
+    {% endfor %}
+    <button type="submit" id="submit-timesheet" data-url="{% url 'timesheet-upload' %}">Submit Timesheet</button>
+</form>
+
+<form id="invoice-form" method="post" enctype="multipart/form-data">
+ {% csrf_token %}
+    <input type="hidden" name="employee_id" value="{{ employee_id }}">
+    <input type="hidden" name="week_start" value="{{ week_start|date:'Y-m-d' }}">
+    <label for="timesheet_file">Upload Timesheet:</label>
+    <input type="file" id="timesheet_file" name="timesheet_file" required>
+    {% for assignment in assignments %}
+    <input type="hidden" name="assignment_ids" value="{{ assignment.job_assignment_id }}">
+    {% endfor %}
+    <button type="submit" id="submit-invoice" data-url="{% url 'invoice-upload' %}">Submit Invoice</button>
+</form>
+
+</div>
+<script>
+
+$(document).ready(function() {
+    $('#assignmentsTable tbody tr').each(function() {
+        calculateRow(this); 
+    });
+})
+
+
+function calculateRow(element) {
+    var row = element.closest('tr');
+    var index = row.getAttribute('data-index');  // Retrieve the index from the data attribute
+
+    var dateText = row.cells[0].textContent; 
+    var startTime = row.querySelector(`[name="start_time_${index}"]`).value;
+    var finishTime = row.querySelector(`[name="finish_time_${index}"]`).value;
+    var lunchHours = parseFloat(row.querySelector(`[name="lunch_hours_${index}"]`).value);
+
+    var [day, month, year] = dateText.split('-').map(Number);
+    var date = new Date(year, month - 1, day); 
+
+    var start = new Date(date);
+    start.setHours(...startTime.split(':').map(Number));
+    var finish = new Date(date);
+    finish.setHours(...finishTime.split(':').map(Number));
+
+    var dayOfWeek = date.getDay();
+    var workedHours = (finish - start) / 36e5 - lunchHours;
+
+    row.querySelector(`[name="worked_hours_${index}"]`).value = workedHours.toFixed(2);
+    var regularHours, overtime1_5x, overtime2x;
+    if (dayOfWeek === 6 || dayOfWeek === 0) { // If it's Saturday or Sunday
+        regularHours = 0; // No regular hours on weekends
+        overtime1_5x = Math.min(workedHours, 2); // First 2 hours at 1.5x
+        overtime2x = Math.max(0, workedHours - 2); // Remaining hours at 2x
+    } else {
+        regularHours = Math.min(8, workedHours);
+        overtime1_5x = Math.max(0, Math.min(workedHours - 8, 2)); // Max of 2 hours at 1.5x
+        overtime2x = Math.max(0, workedHours - 10); // All hours above 10 at 2x rate
+    }
+
+    row.querySelector(`[name="regular_hours_${index}"]`).value = regularHours.toFixed(2);
+    row.querySelector(`[name="overtime_1_5x_${index}"]`).value = overtime1_5x.toFixed(2);
+    row.querySelector(`[name="overtime_2x_${index}"]`).value = overtime2x.toFixed(2);
+
+    var pay = parseFloat(row.cells[9].textContent.replace('$', ''));
+    var pay1_5x = parseFloat(row.cells[10].textContent.replace('$', '') || pay);  // Default to `pay` if `pay_1_5x` is not set
+    var pay2x = parseFloat(row.cells[11].textContent.replace('$', '') || row.cells[10].textContent.replace('$', '') || pay);  // Default to `pay_1_5x` or `pay`
+    var travelPay = parseFloat(row.cells[12].textContent.replace('$', ''));
+
+    var totalPay = regularHours * pay + overtime1_5x * pay1_5x + overtime2x * pay2x;
+    if (travelPay > 1) {
+        totalPay += travelPay;
+    }
+    row.querySelector(`[name="total_pay_${index}"]`).value = totalPay.toFixed(2);
+}
+
+$(document).ready(function() {
+    $('#submit-timesheet').click(function(e) {
+        e.preventDefault();
+        var formData = new FormData($('#timesheet-form')[0]);
+        var postUrl = $(this).data('url'); 
+
+        $.ajax({
+            url: postUrl, 
+            type: 'POST',
+            data: formData,
+            processData: false, 
+            contentType: false, 
+            headers: {
+              "X-CSRFToken": $("meta[name='csrf-token']").attr("content")
+            },
+            success: function(response) {
+                alert('Timesheet saved successfully!');
+            },
+            error: function(xhr, status, error) {
+                alert('Error saving timesheet: ' + error);
+            }
+        });
+    });
+});
+
+$(document).ready(function() {
+    $('#submit-invoice').click(function(e) {
+        e.preventDefault();
+        var formData = new FormData($('#invoice-form')[0]);
+        var postUrl = $(this).data('url'); 
+
+        $.ajax({
+            url: postUrl, 
+            type: 'POST',
+            data: formData,
+            processData: false, 
+            contentType: false, 
+            headers: {
+              "X-CSRFToken": $("meta[name='csrf-token']").attr("content")
+            },
+            success: function(response) {
+                alert('Invoice saved successfully!');
+            },
+            error: function(xhr, status, error) {
+                alert('Error saving invoice: ' + error);
+            }
+        });
+    });
+});
+
+</script>

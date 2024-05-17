@@ -1,0 +1,182 @@
+{% extends 'base.html'%}
+{% block content %}
+{% if user.is_authenticated %}
+
+<style>
+  .bookings-header {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-bottom: 2px solid #dee2e6;
+  }
+
+  .state-selection {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: 19.7rem;
+  }
+
+  .btn-check {
+      display: none;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+      .state-selection {
+          flex-direction: column; /* Stack items vertically on small screens */
+      }
+  }
+</style>
+
+<div class="main-content">
+    <div class="weekly-bookings">
+        <div class="bookings-header">
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                <input type="radio" class="btn-check" name="btnradio" id="HOTNSW" value="HOTNSW" autocomplete="off">
+                <label class="state-button" for="HOTNSW">HOT NSW</label>
+
+                <input type="radio" class="btn-check" name="btnradio" id="NSW" value="NSW" autocomplete="off" checked>
+                <label class="state-button" for="NSW">NSW</label>
+
+                <input type="radio" class="btn-check" name="btnradio" id="VIC" value="VIC" autocomplete="off">
+                <label class="state-button" for="VIC">VIC</label>
+
+                <input type="radio" class="btn-check" name="btnradio" id="QLD" value="QLD" autocomplete="off">
+                <label class="state-button" for="QLD">QLD</label>
+
+
+                <input type="radio" class="btn-check" name="btnradio" id="WA" value="WA" autocomplete="off" >
+                <label class="state-button" for="WA">WA</label>
+         
+                <label for="week_start">Select the period starting from Monday:</label> 
+                <input type="date" class="date-picker" id="week_start" name="week_start">     
+        </div>
+    </div>
+
+    <div id="assigmentTable">
+        {% include 'assignment_table.html' %}
+    </div>
+    
+<div>
+
+
+
+<!--Modal for a pop-up to display details -->
+
+
+<div class="modal fade modal-xl" id="viewBooking" tabindex="-1" aria-labelledby="viewBookingLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewBookingLabel">Details</h5>
+      </div>
+      <div class="modal-body d-flex justify-content-center">
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+
+$(document).ready(function() {
+   
+    $(document).on('click', 'a[data-bs-toggle="modal"]', function(e) {
+        e.preventDefault(); 
+        const weekStart = $('#week_start').val();
+        var url = $(this).data('bs-url') + '?week_start=' + weekStart;  
+       
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                $('#viewBooking .modal-body').html(response);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", xhr.responseText)
+            }
+        });
+    });
+
+    
+});
+
+
+
+// Attach a change event listener to your radio buttons
+$('input[name="btnradio"]').change(function() {
+    updateAssignment();
+});
+
+// Attach a change event listener to your date picker
+$('#week_start').change(function() {
+    if (validateMonday(this)){
+    updateAssignment();
+    }
+});
+
+// Validate Monday date picker selection
+            function validateMonday(input) {
+                const selectedDate = new Date(input.value);
+                if (selectedDate.getDay() !== 1) { // 1 is Monday
+                    alert('Please select a Monday.');
+                    input.value = ''; // Clear the incorrect selection
+                    return false;
+                }
+                return true;
+            }
+
+// Define the updateroster function
+function updateAssignment() {
+    const weekStart = $('#week_start').val();
+    const selectedState = $('input[name="btnradio"]:checked').val();
+    const url = "{% url 'assignment' %}";
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        data: {
+            'week_start': weekStart,
+            'state': selectedState
+        },
+        success: function(response) {
+            $('#assigmentTable').html(response);
+            
+        },
+        error: function() {
+            alert('There was an error updating the assigment table. Please try again.');
+        }
+    });
+}
+
+
+//Ajax function to save the hours entered in the form
+function submitAssignmentsForm() {
+    var formData = $('#assignmentsForm').serialize(); // Serializes the form's elements.
+    $.ajax({
+        url: "{% url 'update_hours' %}",
+        type: 'POST',
+        data: formData,
+        headers: {
+              "X-CSRFToken": $("meta[name='csrf-token']").attr("content")
+          },
+        success: function(response) {
+            alert("The hours have been saved.");
+            $('#viewBooking').modal('hide');
+            updateAssignment();
+        },
+        error: function() {
+            alert("Ops something went wrong, please try again."); // Error message if AJAX fails.
+        }
+    });
+}
+
+</script>
+
+{% endif %}
+{% endblock %}

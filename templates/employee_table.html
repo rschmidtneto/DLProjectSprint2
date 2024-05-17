@@ -1,0 +1,43 @@
+{% if employees %}
+<div class="calendar-table ">
+    <table class="table-hover employees-table">
+        <thead>
+            <tr>
+                <th>Name </th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Next of Kin</th>
+               <!-- <th>Visa</th>
+                <th>expiry date</th>
+                <th>Job</th> -->
+            </tr>
+        </thead>
+        <tbody>
+                {% for employee in employees %}
+                    <tr>
+                        <td><a href="#" data-bs-toggle="modal" data-bs-target="#viewBooking" 
+                        data-bs-url="{% url 'edit_employee' employee.employee_id %}">
+                        {{employee.name}}</a></td>
+                        <td>{{employee.phone}}</td>
+                        <td>{{employee.email}}</td>
+                        <td>{{employee.nextOfKin}}</td>
+                       <!-- <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>{% if employee.general_labour %}✓{% endif %}</td>
+                        <td>{% if employee.traffic_control %}✓{% endif %}</td>
+                        <td>{% if employee.first_aider %}✓{% endif %}</td>
+                        <td>{% if employee.construction_cleaner %}✓{% endif %}</td>
+                        <td>{% if employee.telehandler %}✓{% endif %}</td>
+                        <td>{% if employee.boom_lift %}✓{% endif %}</td>
+                        <td>{% if employee.forklift_driver %}✓{% endif %}</td>
+                        <td>{% if employee.hoister_driver %}✓{% endif %}</td>   -->
+                    </tr>
+                 {% endfor %}    
+        </tbody>
+    </table>  
+</div>
+{% else %}
+<p>No employees found.</p>             
+           
+{% endif %}

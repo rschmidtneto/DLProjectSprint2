@@ -1,0 +1,177 @@
+
+{% block content %}
+
+
+<form id="saveNewBooking" validate>
+ 
+  <div class="card" style="width: 20rem;">
+    <div class="card-boSize">
+      <h5 class="card-title detail-name" id="jobName" style="font-family: 'Ubuntu', sans-serif;">{% if jobId_obj %} {{jobId_obj.po_name}} {% endif %}</h5>
+    </div>
+    <ul class="list-group list-group-flush">
+      <div>{% include 'get_employee.html' %}</div>
+      <div>{% include 'jobrole.html' %}</div>
+    </ul>
+  </div>
+</form> 
+   
+<script>
+
+$(document).ready(function() {
+    $('#multi-day-checkbox').change(function() {
+        if (this.checked) {
+            $('#multi-day-options').show();
+        } else {
+            $('#multi-day-options').hide();
+        }
+    });
+
+    $('#submitBooking').on('click', function(event) {
+        event.preventDefault();
+
+        var jobid = "{{jobId_obj.job_id}}";
+        var employeeid = $('#id-employee').val();
+        var jobRoleid = $('#id-jobrole').val();
+        var startDateStr = "{{ date_obj|date:'Y-m-d' }}";
+        var isMultiDay = $('#multi-day-checkbox').is(':checked');
+        var endDate = $('#end-date').val();
+        var dayRange = $('#day-range-select').val();
+        var startDateObj = new Date(startDateStr);
+        var endDateObj = new Date(endDate);
+
+        // Format the date as d/m/y
+        function formatDate(date) {
+            return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+        }
+
+        if (isMultiDay) {
+            // Confirm multi-day booking
+            var multiDayConfirm = confirm("Are you sure you want to make this booking from " + formatDate(startDateObj) + " to " + formatDate(endDateObj) + "?");
+
+            if (multiDayConfirm) {
+                bookMultipleDays(jobid, employeeid, jobRoleid, startDateStr, dayRange, endDate);
+            }
+        } else {
+            // Confirm single-day booking
+            var singleDayConfirm = confirm("Are you sure you want to make this booking on " + formatDate(startDateObj) + "?");
+
+            if (singleDayConfirm) {
+                postBooking(jobid, employeeid, jobRoleid, startDateStr, function() {
+                    alert("Booking saved.");
+                    $('#viewBooking').modal('hide');
+                    updateRoster();
+                });
+            }
+        }
+    });
+
+    function updateRoster() {
+        const weekStart = $('#week_start').val();
+        const selectedState = $('input[name="btnradio"]:checked').val();
+        const url = "{% url 'roster' %}";
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: {
+                'week_start': weekStart,
+                'state': selectedState
+            },
+            success: function(response) {
+                $('#rosterTable').html(response);
+            },
+            error: function() {
+                alert('There was an error updating the roster. Please try again.');
+            }
+        });
+    }
+
+    function bookMultipleDays(jobid, employeeid, jobRoleid, startDate, dayRange, endDate) {
+        var startDateObj = new Date(startDate);
+        var endDateObj = new Date(endDate);
+        var currentDate = new Date(startDateObj);
+
+        var bookingCount = 0;  // Total number of bookings to be made
+        var completedBookings = 0;  // Successful bookings completed
+
+        // Calculate how many bookings need to be made
+        while (currentDate <= endDateObj) {
+            if (shouldBookDate(currentDate, dayRange)) {
+                bookingCount++;
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        // Reset the date to start booking
+        currentDate = new Date(startDateObj);
+
+        if (bookingCount === 0) {
+            // If no bookings are needed, directly update the roster
+            updateRoster();
+            return;
+        }
+
+        // Make each booking and track completions
+        while (currentDate <= endDateObj) {
+            if (shouldBookDate(currentDate, dayRange)) {
+                var dateStr = currentDate.toISOString().split('T')[0];
+
+                postBooking(jobid, employeeid, jobRoleid, dateStr, function() {
+                    completedBookings++;
+                    if (completedBookings === bookingCount) {
+                        alert("Booking saved.");
+                        $('#viewBooking').modal('hide');
+                        updateRoster();
+                    }
+                });
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+    }
+
+    function shouldBookDate(date, dayRange) {
+        var day = date.getDay();
+        switch (dayRange) {
+            case 'mon-fri':
+                return day >= 1 && day <= 5;  
+            case 'mon-sat':
+                return day >= 1 && day <= 6;  
+            case 'sun-sat':
+                return day >= 0 && day <= 6;  
+            default:
+                return false;
+        }
+    }
+
+    function postBooking(jobid, employeeid, jobRoleid, dateStr, onCompleted) {
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'createBooking' %}",
+            data: { 
+                'jobid': jobid,
+                'employeeid': employeeid,
+                'jobRoleid': jobRoleid,
+                'date': dateStr,
+            },
+            headers: {
+                "X-CSRFToken": $("meta[name='csrf-token']").attr("content")
+            },
+            success: function(response) {
+                if (onCompleted) {
+                    onCompleted();
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("Ops there was an error, please make sure you have selected an employee and a job role.")
+                console.error("Error on " + dateStr + ": " + xhr.responseText);
+            }
+        });
+    }
+});
+
+
+</script>
+
+
+
+{% endblock content %}

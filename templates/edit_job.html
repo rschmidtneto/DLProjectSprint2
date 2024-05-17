@@ -1,0 +1,40 @@
+<div class="card" style="width: 20rem; align-items: center;">
+        <form id="updateJobForm" method="POST">
+        {% csrf_token %}
+            <input type="hidden" name="job_id" value="{{ job.job_id }}">
+            <div>
+                <label for="id_client">Client:</label>
+                {{ form.client }}
+                {% if form.client.errors %}
+                    <div class="error">{{ form.client.errors }}</div>
+                {% endif %}
+            </div>
+            <div>
+                <label for="id_po_name">PO Name:</label>
+                {{ form.po_name }}
+                {% if form.po_name.errors %}
+                    <div class="error">{{ form.po_name.errors }}</div>
+                {% endif %}
+            </div>
+            <div>
+                <label for="id_address">Address:</label>
+                {{ form.address }}
+                {% if form.address.errors %}
+                    <div class="error">{{ form.address.errors }}</div>
+                {% endif %}
+            </div>
+            <div>
+                <label for="id_state">State:</label>
+                {{ form.state }}
+                {% if form.state.errors %}
+                    <div class="error">{{ form.state.errors }}</div>
+                {% endif %}
+            </div>
+            {% if form.non_field_errors %}
+                <div class="error">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <br>
+            <button type="button" onclick="submitUpdateJobForm();" id="addPersonButton">Update Job details</button>
+    </div>        
+    </form>
+    </div>
