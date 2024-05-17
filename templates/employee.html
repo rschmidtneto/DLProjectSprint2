@@ -1,0 +1,125 @@
+{% extends 'base.html'%}
+{% block content %}
+{% if user.is_authenticated %}
+
+<div class="main-content">
+    <div class="employees">
+        <div class="employees-header">
+            <h2 style="font-family: 'Ubuntu', sans-serif;">EMPLOYEE DETAILS</h2>
+        </div>
+        <div class="employees-wrap">
+            <div class="employees-filter">
+                <div class="employees-search-filter">
+                    <i id="search-icon" class="fa fa-search"></i>
+                    <input id="user-input" placeholder = " Search employee ">
+                </div>
+                <div class="employees-job-filter">
+                    <select>
+                        <option>Select job role</option>
+                        <option value="general_labour" id="general_labour" data-filter="general_labour">General Labour</option>
+                        <option value="traffic_controller" id="traffic_controller" data-filter="traffic_controller">Traffic Controller</option>
+                        <option value="first_aider" id="first_aider" data-filter="first_aider">First Aider</option>
+                        <option value="construction_cleaner" id="construction_cleaner" data-filter="construction_cleaner">Construction Cleaner</option>
+                        <option value="boom_lift" id="boom_lift" data-filter="boom_lift">Boom Lift Operator</option>
+                        <option value="telehandler" id="telehandler" data-filter="telehandler">Telehandler Operator></option>
+                        <option value="forklift_driver" id="forklift_driver" data-filter="forklift_driver">Forklift Driver</option>
+                        <option value="hoister_driver" id="hoister_driver" data-filter="hoister_driver">Hoister Driver</option>
+                    </select>
+                </div>
+            </div>
+            <div class="employees-add-btn">
+                <button id="addPersonButton"><a class="add-job" href="#" data-bs-toggle="modal" data-bs-target="#viewBooking" data-bs-url="{% url 'add_employee' %}">+ New Employee</a></button>
+            </div>
+        </div>
+        
+    <div id="replace_employee" class="col">
+        {% include 'employee_table.html' %}
+    </div>
+    
+<div>
+<!--Modal for a pop-up to display details -->
+
+
+<div class="modal fade modal-sm" id="viewBooking" tabindex="-1" aria-labelledby="viewBookingLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewBookingLabel">Details</h5>
+      </div>
+      <div class="modal-body employee-modal">
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$(document).ready(function() {
+   
+    $(document).on('click', 'a[data-bs-toggle="modal"]', function(e) {
+        e.preventDefault(); 
+        var url = $(this).data('bs-url');  
+       
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                $('#viewBooking .modal-body').html(response);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", xhr.responseText)
+            }
+        });
+    });
+
+    const user_input = $("#user-input"); // Input element
+    const job_role_select = $("select"); // Dropdown selector for job roles
+    const employee_div = $('#replace_employee'); // Container to replace content
+    const url = '/get-employees/'; // Endpoint URL
+    const delay_by_in_ms = 700; // Delay before the search
+    let scheduled_function = false; // Scheduled function for delayed execution
+
+    function collectFilters() {
+    let filters = {};
+    let selectedRole = job_role_select.find(":selected").data("filter");
+    if (selectedRole) {
+        filters[selectedRole] = true;
+    }
+    return filters;
+}
+
+    function searchEmployee() {
+        let data = {
+            'q': user_input.val(),
+            ...collectFilters()  // Collect and add boolean filters to data object
+        };
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: data,
+            success: function(response) {
+                employee_div.html(response);
+            },
+            error: function() {
+                alert('Please try again.');
+            }
+        });
+    }
+
+    user_input.add(job_role_select).on('input change', function() {  // Handle both text input and checkbox changes
+       
+        if (scheduled_function) clearTimeout(scheduled_function);
+        scheduled_function = setTimeout(searchEmployee, delay_by_in_ms);
+    });
+});
+
+    
+
+
+</script>
+{% endif %}
+{% endblock %}

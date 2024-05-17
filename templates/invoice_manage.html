@@ -1,0 +1,107 @@
+{% extends 'base.html'%}
+{% block content %}
+
+<div class="main-content">
+    <div class="weekly-bookings">
+        <table class="calendar-table">
+        <thead>
+            <tr>
+                <th scope="col">Invoice Number</th>
+                <th scope="col">PO Name</th>
+                <th scope="col">Client</th>
+                <th scope="col">Due Date</th>
+                <th scope="col">Total Hours</th>
+                <th scope="col">Sub Total</th>
+                <th scope="col">GST</th>
+                <th scope="col">Invoice Total</th>
+                <th scope="col">Total Cost</th>
+                <th scope="col">Profit</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for invoice in invoices %}
+
+            <tr>
+                <td><a  href="#" data-bs-toggle="modal" data-bs-target="#viewBooking" data-bs-url="{% url 'view-invoice' invoice.invoice_id %}"> {{ invoice.invoice_id}}</a> </td>
+                <td> {{ invoice.po_name}} </td>
+                <td> {{ invoice.client}} </td>
+                <td> {{ invoice.due_date|date:"d/m" }} </td>
+                <td> {{ invoice.worked_hours}} </td>
+                <td> AU$ {{ invoice.total}} </td>
+                <td> AU$ {{ invoice.gst }} </td>
+                <td> AU$ {{ invoice.invoice_total }} </td>
+                <td> AU$ {{ invoice.cost }} </td>
+                <td> AU$ {{ invoice.profit }} </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10">No invoices available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+
+    <div>
+        <span>Page: {{ invoices.number }} of {{ invoices.paginator.num_pages }}</span>
+        {% if invoices.has_previous %}
+            <a href="?page=1">First</a>
+            <a href="?page={{ invoices.previous_page_number }}"> &laquo; previous</a>
+        {% endif %}
+        {% if invoices.has_next %}
+            <a href="?page={{ invoices.next_page_number }}">next &raquo;</a>
+            <a href="?page={{ invoices.paginator.num_pages }}">Last</a>
+        {% endif %}
+    </div>
+    </div>
+    </div>
+
+
+    <!--Modal for a pop-up to display details -->
+
+
+<div class="modal fade modal-lg" id="viewBooking" tabindex="-1" aria-labelledby="viewBookingLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewBookingLabel">Details</h5>
+      </div>
+      <div class="modal-body d-flex justify-content-center">
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    
+    $(document).on('click', 'a[data-bs-toggle="modal"]', function(e) {
+        e.preventDefault();
+        var url = $(this).data('bs-url');
+
+        console.log("URL fetched for AJAX: ", url); // This will log the URL to console, check if it's correct.
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function(response) {
+                $('#viewBooking .modal-body').html(response);
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX Error:", xhr.responseText);
+                $('#viewBooking .modal-body').html('<p>Error loading details.</p>');
+            }
+        });
+    });
+});
+
+</script>
+
+{% endblock %}
+
